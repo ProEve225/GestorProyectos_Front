@@ -20,6 +20,7 @@ const Login = () => {
           <div>
             <p className="gp-subtitle">Gestor de proyectos</p>
           </div>
+          <br/>
 
           <h1 className="form-title">Iniciar Sesión</h1>
 
