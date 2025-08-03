@@ -1,2 +1,1 @@
-export const API_URL = ""
-//acompletar laa url
+export const API_URL = "http://187.184.8.196:8080"
