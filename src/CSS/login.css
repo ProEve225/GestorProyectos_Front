@@ -14,7 +14,7 @@ body {
 .login-container {
   height: 100vh;
   width: 100vw;
-  background: url('../assets/portada.png') center center / cover no-repeat;
+  background: url('../assets/portada2.jpg') center center / cover no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -63,7 +63,7 @@ body {
 .gp-text {
   font-size: 3rem;
   font-weight: bold;
-  color: #8b4513;
+  color: #c99f80;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   display: block;
 }
