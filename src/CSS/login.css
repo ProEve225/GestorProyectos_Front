@@ -74,6 +74,7 @@ body {
   font-weight: 500;
   font-style: italic;
   margin-top: 0.5rem;
+  text-align: center;
 }
 
 .form-title {
@@ -122,6 +123,35 @@ body {
   color: #9ca3af;
 }
 
+.form-input:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: -0.5rem;
+}
+
+.forgot-link {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.forgot-link:hover {
+  color: #2563eb;
+}
+
+.forgot-link:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
 .submit-button {
   background: #3b82f6;
   color: white;
@@ -135,7 +165,7 @@ body {
   margin-top: 1rem;
 }
 
-.submit-button:hover {
+.submit-button:hover:not(:disabled) {
   background: #2563eb;
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
@@ -143,6 +173,54 @@ body {
 
 .submit-button:active {
   transform: translateY(0);
+}
+
+.submit-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.back-button {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.back-button:hover:not(:disabled) {
+  background: #4b5563;
+}
+
+.back-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #fecaca;
+  font-size: 0.9rem;
+}
+
+.success-message {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #a7f3d0;
+  font-size: 0.9rem;
 }
 
 /* Responsive Design */

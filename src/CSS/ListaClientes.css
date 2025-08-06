@@ -63,20 +63,6 @@
   line-height: 1.2;
 }
 
-.gp-logo {
-  background: #8b4513;
-  color: white;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0 auto;
-}
-
 .sidebar-nav {
   flex: 1;
   padding: 1rem 0;
@@ -109,6 +95,28 @@
 .sidebar-footer {
   padding: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.change-password-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.change-password-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .logout-btn {
@@ -485,6 +493,11 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.form-group input:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
 .modal-actions {
   display: flex;
   gap: 1rem;
@@ -502,8 +515,13 @@
   transition: all 0.3s ease;
 }
 
-.cancel-btn:hover {
+.cancel-btn:hover:not(:disabled) {
   border-color: #d1d5db;
+}
+
+.cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .save-btn {
@@ -516,8 +534,36 @@
   transition: all 0.3s ease;
 }
 
-.save-btn:hover {
+.save-btn:hover:not(:disabled) {
   background: #2563eb;
+}
+
+.save-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #fecaca;
+  font-size: 0.9rem;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f8fafc;
+}
+
+.loading-spinner {
+  font-size: 1.2rem;
+  color: #3b82f6;
 }
 
 /* Responsive Design */
