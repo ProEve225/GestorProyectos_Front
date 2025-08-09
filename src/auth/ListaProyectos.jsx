@@ -4,6 +4,15 @@ import { clienteService } from '../services/clienteService';
 import { authService } from '../services/authService';
 import { showNotification } from '../components/NotificationSystem';
 import '../CSS/ListaProyectos.css';
+import { 
+  Users,              // Usuarios
+  Folder,             // Proyectos
+  LayoutDashboard,    // Dashboard
+  Lock,               // Cambiar contraseña
+  LogOut,             // Cerrar sesión
+  Search              // Buscar
+} from 'lucide-react';
+
 
 const ListaProyectos = ({ onNavigate, onLogout }) => {
   const [proyectos, setProyectos] = useState([]);
@@ -212,26 +221,36 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
         
         <nav className="sidebar-nav">
           <button className="nav-item" onClick={() => onNavigate('dashboard')}>
-            <span className="nav-icon">📊</span>
+            <span className="nav-icon">
+              <LayoutDashboard size={16} />
+            </span>
             Dashboard
           </button>
           <button className="nav-item" onClick={() => onNavigate('clientes')}>
-            <span className="nav-icon">👥</span>
+            <span className="nav-icon">
+              <Users size={16} />
+            </span>
             Clientes
           </button>
           <button className="nav-item active">
-            <span className="nav-icon">📁</span>
+            <span className="nav-icon">
+              <Folder size={16} />
+            </span>
             Proyectos
           </button>
         </nav>
         
         <div className="sidebar-footer">
           <button className="change-password-btn" onClick={() => setShowChangePassword(true)}>
-            <span className="nav-icon">🔑</span>
+            <span className="nav-icon">
+              <Lock size={16} />
+            </span>
             Cambiar Contraseña
           </button>
           <button className="logout-btn" onClick={handleLogout}>
-            <span className="nav-icon">⬅️</span>
+            <span className="nav-icon">
+              <LogOut size={16} />
+            </span>
             Cerrar Sesión
           </button>
         </div>
@@ -259,13 +278,18 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
               />
-              <span className="search-icon">🔍</span>
+              <span className="search-icon">
+                <span className="nav-icon">
+                    <Search size={16} />
+                  </span>
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="tabla-proyectos">
-          <table>
+        {/* Tabla de Proyectos */}
+        <div className="clients-table-container">
+          <table className="clients-table">
             <thead>
               <tr>
                 <th>ID Cliente</th>
@@ -320,7 +344,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
                         className="btn-eliminar"
                         onClick={() => handleDeleteProject(proyecto.id)}
                       >
-                        🗑️
+                        Eliminar
                       </button>
                     </div>
                   </td>

@@ -3,6 +3,15 @@ import { clienteService } from '../services/clienteService';
 import { authService } from '../services/authService';
 import '../CSS/ListaClientes.css';
 import { showNotification } from '../components/NotificationSystem';
+import { 
+  Users,              // Usuarios
+  Folder,             // Proyectos
+  LayoutDashboard,    // Dashboard
+  Lock,               // Cambiar contraseña
+  LogOut,             // Cerrar sesión
+  Search,             // Buscar
+  Eye
+} from 'lucide-react';
 
 const ListaClientes = ({ onNavigate, onLogout }) => {
   const [clientes, setClientes] = useState([]);
@@ -294,33 +303,43 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
         
         <nav className="sidebar-nav">
           <div className="nav-item" onClick={() => onNavigate('dashboard')}>
-            <span className="nav-icon">📊</span>
+            <span className="nav-icon">
+              <LayoutDashboard size={16} />
+            </span>
             Dashboard
           </div>
           <div className="nav-item active">
-            <span className="nav-icon">👥</span>
+            <span className="nav-icon">
+              <Users size={16} />
+            </span>
             Clientes
           </div>
           <div className="nav-item" onClick={() => onNavigate('proyectos')}>
-            <span className="nav-icon">📁</span>
+            <span className="nav-icon">
+              <Folder size={16} />
+            </span>
             Proyectos
           </div>
         </nav>
         
         <div className="sidebar-footer">
           <button className="change-password-btn" onClick={() => setShowChangePassword(true)}>
-            <span className="nav-icon">🔑</span>
+            <span className="nav-icon">
+              <Lock size={16} />
+            </span>
             Cambiar Contraseña
           </button>
           <button className="logout-btn" onClick={handleLogout}>
-            <span className="nav-icon">⬅️</span>
+            <span className="nav-icon">
+              <LogOut size={16} />
+            </span>
             Cerrar Sesión
           </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="main-content">
+      <main className="contenido">
         {/* Header */}
         <div className="content-header">
           <div className="user-info">
@@ -347,7 +366,11 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="search-input"
                 />
-                <span className="search-icon">🔍</span>
+                <span className="search-icon">
+                  <span className="nav-icon">
+                    <Search size={16} />
+                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -362,7 +385,7 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
                   <th>Correo del cliente</th>
                   <th>Contacto</th>
                   <th>Ver más</th>
-                  <th>Actualizar</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -377,7 +400,9 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
                         className="view-btn"
                         onClick={() => handleViewClient(cliente)}
                       >
-                        👁️
+                        <span className="nav-icon">
+                          <Eye size={16} />
+                        </span>
                       </button>
                     </td>
                     <td>
@@ -392,7 +417,7 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
                           className="delete-btn"
                           onClick={() => handleDeleteClient(cliente.id)}
                         >
-                          🗑️
+                          Eliminar
                         </button>
                       </div>
                     </td>
@@ -435,7 +460,7 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       {/* Modales */}
       {showModal && <ClientModal />}

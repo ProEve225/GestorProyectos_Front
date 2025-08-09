@@ -4,6 +4,16 @@ import { proyectoService } from '../services/proyectoService';
 import { authService } from '../services/authService';
 import { showNotification } from './NotificationSystem';
 import '../CSS/Dashboard.css';
+import { 
+  Users,              // Usuarios
+  Folder,             // Proyectos
+  LayoutDashboard,    // Dashboard
+  CheckCircle,        // Proyectos facturados  
+  Clock,              // Proyectos pendientes
+  DollarSign,         // Monto
+  Lock,               // Cambiar contraseña
+  LogOut              // Cerrar sesión
+} from 'lucide-react';
 
 const Dashboard = ({ onNavigate, onLogout }) => {
   const [stats, setStats] = useState({
@@ -155,9 +165,9 @@ const Dashboard = ({ onNavigate, onLogout }) => {
   }
 
   return (
-    <div className="dashboard-container">
+    <div className="contenedor-principal">
       {/* Sidebar */}
-      <div className="sidebar">
+      <aside className="sidebar">
         <div className="sidebar-header">
           <div className="logo-container">
             <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo" />
@@ -166,33 +176,43 @@ const Dashboard = ({ onNavigate, onLogout }) => {
         
         <nav className="sidebar-nav">
           <div className="nav-item active">
-            <span className="nav-icon">📊</span>
+            <span className="nav-icon">
+              <LayoutDashboard size={16} />
+            </span>
             Dashboard
           </div>
           <div className="nav-item" onClick={() => onNavigate('clientes')}>
-            <span className="nav-icon">👥</span>
+            <span className="nav-icon">
+              <Users size={16} />
+            </span>
             Clientes
           </div>
           <div className="nav-item" onClick={() => onNavigate('proyectos')}>
-            <span className="nav-icon">📁</span>
+            <span className="nav-icon">
+              <Folder size={16} />
+            </span>
             Proyectos
           </div>
         </nav>
         
         <div className="sidebar-footer">
           <button className="change-password-btn" onClick={() => setShowChangePassword(true)}>
-            <span className="nav-icon">🔑</span>
+            <span className="nav-icon">
+              <Lock size={16} />
+            </span>
             Cambiar Contraseña
           </button>
           <button className="logout-btn" onClick={handleLogout}>
-            <span className="nav-icon">⬅️</span>
+            <span className="nav-icon">
+              <LogOut size={16} />
+            </span>
             Cerrar Sesión
           </button>
         </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="main-content">
+      <main className="contenido">
         {/* Header */}
         <div className="content-header">
           <div className="user-info">
@@ -211,23 +231,35 @@ const Dashboard = ({ onNavigate, onLogout }) => {
           {/* Stats Cards - Optimizado para usar todo el espacio */}
           <div className="stats-grid-optimized">
             <div className="stat-card">
-              <div className="stat-icon">👥</div>
+              <div className="stat-icon">
+                <span className="nav-icon">
+              <Users size={50} />
+            </span>
+              </div>
               <div className="stat-content">
                 <h3>{stats.totalClientes}</h3>
-                <p>Total Clientes</p>
+                <p>Total de Clientes</p>
               </div>
             </div>
             
             <div className="stat-card">
-              <div className="stat-icon">📁</div>
+              <div className="stat-icon">
+                <span className="nav-icon">
+                  <Folder size={50} />
+                </span>
+              </div>
               <div className="stat-content">
                 <h3>{stats.totalProyectos}</h3>
-                <p>Total Proyectos</p>
+                <p>Total de Proyectos</p>
               </div>
             </div>
             
             <div className="stat-card">
-              <div className="stat-icon">✅</div>
+              <div className="stat-icon">
+                <span className="nav-icon">
+                  <CheckCircle size={50} />
+                </span>
+              </div>
               <div className="stat-content">
                 <h3>{stats.proyectosRealizados}</h3>
                 <p>Proyectos Facturados</p>
@@ -235,7 +267,11 @@ const Dashboard = ({ onNavigate, onLogout }) => {
             </div>
             
             <div className="stat-card">
-              <div className="stat-icon">⏳</div>
+              <div className="stat-icon">
+                <span className="nav-icon">
+                  <Clock size={50} />
+                </span>
+              </div>
               <div className="stat-content">
                 <h3>{stats.proyectosPendientes}</h3>
                 <p>Proyectos Pendientes</p>
@@ -243,10 +279,14 @@ const Dashboard = ({ onNavigate, onLogout }) => {
             </div>
             
             <div className="stat-card large">
-              <div className="stat-icon">💰</div>
+              <div className="stat-icon">
+                <span className="nav-icon">
+                  <DollarSign size={50} />
+                </span>
+              </div>
               <div className="stat-content">
                 <h3>{formatCurrency(stats.montoTotal)}</h3>
-                <p>Monto Total de Proyectos</p>
+                <p>Monto Total de los Proyectos</p>
               </div>
             </div>
           </div>
@@ -259,20 +299,24 @@ const Dashboard = ({ onNavigate, onLogout }) => {
                 className="action-btn"
                 onClick={() => onNavigate('clientes')}
               >
-                <span className="action-icon">👥</span>
+                <span className="nav-icon">
+                  <Users size={25} />
+                </span>
                 <span>Gestionar Clientes</span>
               </button>
               <button 
                 className="action-btn"
                 onClick={() => onNavigate('proyectos')}
               >
-                <span className="action-icon">📁</span>
+                <span className="nav-icon">
+                  <Folder size={25} />
+                </span>
                 <span>Gestionar Proyectos</span>
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Modal de cambiar contraseña */}
       {showChangePassword && <ChangePasswordModal />}
