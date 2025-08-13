@@ -1,7 +1,7 @@
 .contenedor-principal {
   display: flex;
   height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: #f8fafc;
 }
 
@@ -71,10 +71,14 @@
   border-left: 3px solid transparent;
   background: none;
   border: none;
-  color: white;
+  color: #00ffff;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
   width: 100%;
   text-align: left;
   font-size: 1rem;
+  font-weight: 800;
+  background-color: rgba(0,0,0,0.4);
+  border-radius: 6px;
 }
 
 .nav-item:hover {
@@ -84,7 +88,7 @@
 .nav-item.active {
   background: rgba(255, 255, 255, 0.15);
   border-left-color: white;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .nav-icon {
@@ -293,6 +297,18 @@
 
 .btn-parcialidades:hover {
   background: #059669;
+}
+
+.btn-parcialidades.disabled,
+.btn-parcialidades:disabled {
+  background: #9ca3af !important;
+  color: #6b7280 !important;
+  cursor: not-allowed !important;
+}
+
+.btn-parcialidades.disabled:hover,
+.btn-parcialidades:disabled:hover {
+  background: #9ca3af !important;
 }
 
 .btn-eliminar {
@@ -780,7 +796,7 @@
   .form-grid-3 {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   .modal-optimized {
     width: 95%;
     max-width: 900px;
@@ -791,11 +807,11 @@
   .sidebar {
     width: 250px;
   }
-  
+
   .contenido {
     margin-left: 250px;
   }
-  
+
   .parcialidad-fields {
     grid-template-columns: 1fr 1fr;
   }
@@ -805,32 +821,32 @@
   .form-grid-3 {
     grid-template-columns: 1fr;
   }
-  
+
   .modal-optimized {
     width: 98%;
     padding: 1rem;
   }
-  
+
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .header-actions {
     flex-direction: column;
     width: 100%;
     gap: 0.5rem;
   }
-  
+
   .search-input {
     width: 100%;
   }
-  
+
   .tabla-proyectos {
     overflow-x: auto;
   }
-  
+
   .parcialidad-fields {
     grid-template-columns: 1fr;
   }
@@ -840,29 +856,29 @@
   .sidebar {
     width: 200px;
   }
-  
+
   .contenido {
     margin-left: 200px;
     padding: 1rem;
   }
-  
+
   .tabla-proyectos th,
   .tabla-proyectos td {
     padding: 0.5rem;
     font-size: 0.75rem;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     gap: 0.25rem;
   }
-  
+
   .btn-actualizar,
   .btn-parcialidades {
     font-size: 0.7rem;
     padding: 0.4rem 0.8rem;
   }
-  
+
   .modal {
     width: 95%;
     padding: 1rem;

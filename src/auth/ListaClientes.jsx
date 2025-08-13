@@ -4,12 +4,12 @@ import { authService } from '../services/authService';
 import '../CSS/ListaClientes.css';
 import { showNotification } from '../components/NotificationSystem';
 import { 
-  Users,              // Usuarios
-  Folder,             // Proyectos
-  LayoutDashboard,    // Dashboard
-  Lock,               // Cambiar contraseña
-  LogOut,             // Cerrar sesión
-  Search,             // Buscar
+  Users,
+  Folder,
+  LayoutDashboard,
+  Lock,
+  LogOut,
+  Search,
   Eye
 } from 'lucide-react';
 
@@ -24,9 +24,9 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const clientsPerPage = 8;
 
-  // Cargar clientes al montar el componente
   useEffect(() => {
     cargarClientes();
   }, []);
@@ -45,7 +45,6 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
     }
   };
 
-  // Filtrar clientes por búsqueda
   useEffect(() => {
     const filtered = clientes.filter(cliente =>
       cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,7 +56,6 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
     setCurrentPage(1);
   }, [searchTerm, clientes]);
 
-  // Paginación
   const indexOfLastClient = currentPage * clientsPerPage;
   const indexOfFirstClient = indexOfLastClient - clientsPerPage;
   const currentClients = filteredClientes.slice(indexOfFirstClient, indexOfLastClient);
@@ -80,7 +78,8 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
   };
 
   const handleViewClient = (client) => {
-    showNotification('info', `Ver detalles de ${client.nombre}\nID: ${client.idCliente}\nCorreo: ${client.correo}\nContacto: ${client.contacto}`);
+    setSelectedClient(client);
+    setShowViewModal(true);
   };
 
   const handleSaveClient = async (clientData) => {
@@ -90,7 +89,7 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
       } else {
         await clienteService.actualizar(selectedClient.id, clientData);
       }
-      await cargarClientes(); // Recargar la lista
+      await cargarClientes();
       showNotification('success', modalType === 'add' ? 'Cliente agregado exitosamente' : 'Cliente actualizado exitosamente');
       setShowModal(false);
     } catch (error) {
@@ -103,7 +102,7 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
       try {
         await clienteService.eliminar(clientId);
-        await cargarClientes(); // Recargar la lista
+        await cargarClientes();
         showNotification('success', 'Cliente eliminado exitosamente');
       } catch (error) {
         console.error('Error al eliminar cliente:', error);
@@ -115,6 +114,61 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
   const handleLogout = () => {
     authService.logout();
     onLogout();
+  };
+
+  const ViewClientModal = () => {
+    if (!selectedClient) return null;
+
+    return (
+      <div className="modal-overlay">
+        <div className="view-modal-content">
+          <div className="view-modal-header">
+            <h3>Detalles del Cliente</h3>
+            <button className="close-btn" onClick={() => setShowViewModal(false)}>×</button>
+          </div>
+          <div className="view-modal-body">
+            <div className="client-detail-card">
+              <div className="detail-item">
+                <div className="detail-content">
+                  <label>ID del Cliente</label>
+                  <span>{selectedClient.idCliente}</span>
+                </div>
+              </div>
+              <div className="detail-item">
+                <div className="detail-content">
+                  <label>Nombre del Cliente</label>
+                  <span>{selectedClient.nombre}</span>
+                </div>
+              </div>
+              <div className="detail-item">
+                <div className="detail-content">
+                  <label>Correo Electrónico</label>
+                  <span>{selectedClient.correo}</span>
+                </div>
+              </div>
+              <div className="detail-item">
+                <div className="detail-content">
+                  <label>Contacto</label>
+                  <span>{selectedClient.contacto}</span>
+                </div>
+              </div>
+            </div>
+            <div className="view-modal-actions">
+              <button
+                className="edit-from-view-btn"
+                onClick={() => {
+                  setShowViewModal(false);
+                  handleEditClient(selectedClient);
+                }}
+              >
+                Actualizar Cliente
+              </button>
+              <button className="close-view-btn" onClick={() => setShowViewModal(false)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const ClientModal = () => {
@@ -293,11 +347,10 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
 
   return (
     <div className="lista-clientes-container">
-      {/* Sidebar */}
       <div className="sidebar">
         <div className="sidebar-header">
           <div className="logo-container">
-            <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo" />
+            <img src="src/assets/Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo" />
           </div>
         </div>
         
@@ -338,9 +391,7 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="contenido">
-        {/* Header */}
         <div className="content-header">
           <div className="user-info">
             <span>{authService.getCurrentUser()?.nombre || 'Administrador'}</span>
@@ -348,7 +399,6 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
           </div>
         </div>
 
-        {/* Content */}
         <div className="content-body">
           {error && <div className="error-message">{error}</div>}
           
@@ -367,15 +417,12 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
                   className="search-input"
                 />
                 <span className="search-icon">
-                  <span className="nav-icon">
-                    <Search size={16} />
-                  </span>
+                  <Search size={16} />
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Tabla de Clientes */}
           <div className="clients-table-container">
             <table className="clients-table">
               <thead>
@@ -400,9 +447,7 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
                         className="view-btn"
                         onClick={() => handleViewClient(cliente)}
                       >
-                        <span className="nav-icon">
-                          <Eye size={16} />
-                        </span>
+                        <Eye size={16} />
                       </button>
                     </td>
                     <td>
@@ -427,7 +472,6 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
             </table>
           </div>
 
-          {/* Paginación */}
           {totalPages > 1 && (
             <div className="pagination">
               <button 
@@ -462,9 +506,9 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
         </div>
       </main>
 
-      {/* Modales */}
       {showModal && <ClientModal />}
       {showChangePassword && <ChangePasswordModal />}
+      {showViewModal && <ViewClientModal />}
     </div>
   );
 };

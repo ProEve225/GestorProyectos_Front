@@ -15,6 +15,23 @@
   padding: 4px;
 }
 
+.sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, #3b82f6 0%, #1e40af 100%);
+  background-image: url("../assets/Fondo_sidebar.avif"), linear-gradient(180deg, #5d6275 0%, #5d6275 20%);
+  background-size: cover, cover;
+  background-position: center, center;
+  background-blend-mode: overlay;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  z-index: 100;
+}
+
 .change-password-btn {
   display: flex;
   align-items: center;

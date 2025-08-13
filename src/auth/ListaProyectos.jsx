@@ -1,161 +1,153 @@
-import React, { useState, useEffect } from 'react';
-import { proyectoService } from '../services/proyectoService';
-import { clienteService } from '../services/clienteService';
-import { authService } from '../services/authService';
-import { showNotification } from '../components/NotificationSystem';
-import '../CSS/ListaProyectos.css';
-import { 
-  Users,              // Usuarios
-  Folder,             // Proyectos
-  LayoutDashboard,    // Dashboard
-  Lock,               // Cambiar contraseña
-  LogOut,             // Cerrar sesión
-  Search              // Buscar
-} from 'lucide-react';
-
+import { useState, useEffect } from "react"
+import { proyectoService } from "../services/proyectoService"
+import { clienteService } from "../services/clienteService"
+import { authService } from "../services/authService"
+import { showNotification } from "../components/NotificationSystem"
+import "../CSS/ListaProyectos.css"
+import { Users, Folder, LayoutDashboard, Lock, LogOut, Search, Calendar } from "lucide-react"
 
 const ListaProyectos = ({ onNavigate, onLogout }) => {
-  const [proyectos, setProyectos] = useState([]);
-  const [filteredProyectos, setFilteredProyectos] = useState([]);
-  const [clientes, setClientes] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalType, setModalType] = useState('add');
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [showParcialidadesModal, setShowParcialidadesModal] = useState(false);
+  const [proyectos, setProyectos] = useState([])
+  const [filteredProyectos, setFilteredProyectos] = useState([])
+  const [clientes, setClientes] = useState([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [modalType, setModalType] = useState("add")
+  const [selectedProject, setSelectedProject] = useState(null)
+  const [showChangePassword, setShowChangePassword] = useState(false)
+  const [showParcialidadesModal, setShowParcialidadesModal] = useState(false)
+
+  const [dateFilter, setDateFilter] = useState({
+    type: "all", // 'all', 'custom', 'thisMonth', 'lastMonth', 'thisYear', 'lastYear'
+    startDate: "",
+    endDate: "",
+  })
+  const [showDateFilter, setShowDateFilter] = useState(false)
 
   useEffect(() => {
-    cargarDatos();
-  }, []);
+    cargarDatos()
+  }, [])
 
-  // Filtrar proyectos por búsqueda
+  // Filtrar proyectos por búsqueda y fecha
   useEffect(() => {
-    const filtered = proyectos.filter(proyecto =>
-      proyecto.nombreCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proyecto.idCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proyecto.idCotizacion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (proyecto.ordenCompra && proyecto.ordenCompra.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-    setFilteredProyectos(filtered);
-  }, [searchTerm, proyectos]);
+    const searchFiltered = proyectos.filter(
+      (proyecto) =>
+        proyecto.nombreCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        proyecto.idCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        proyecto.idCotizacion.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (proyecto.ordenCompra && proyecto.ordenCompra.toLowerCase().includes(searchTerm.toLowerCase())),
+    )
+
+    // Apply date filter after search filter
+    const dateFiltered = filterProjectsByDate(searchFiltered)
+    setFilteredProyectos(dateFiltered)
+  }, [searchTerm, proyectos, dateFilter])
 
   const cargarDatos = async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       const [proyectosData, clientesData] = await Promise.all([
         proyectoService.obtenerTodos(),
-        clienteService.obtenerTodos()
-      ]);
-      setProyectos(proyectosData);
-      setFilteredProyectos(proyectosData);
-      setClientes(clientesData);
+        clienteService.obtenerTodos(),
+      ])
+      setProyectos(proyectosData)
+      setFilteredProyectos(proyectosData)
+      setClientes(clientesData)
     } catch (error) {
-      console.error('Error al cargar datos:', error);
-      showNotification('error', 'Error al cargar los datos');
+      console.error("Error al cargar datos:", error)
+      showNotification("error", "Error al cargar los datos")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const handleAddProject = () => {
-    setModalType('add');
-    setSelectedProject(null);
-    setModalVisible(true);
-  };
-
-  const handleEditProject = (project) => {
-    setModalType('edit');
-    setSelectedProject(project);
-    setModalVisible(true);
-  };
-
-  const handleDeleteProject = async (projectId) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este proyecto?')) {
-      try {
-        await proyectoService.eliminar(projectId);
-        await cargarDatos();
-        showNotification('success', 'Proyecto eliminado exitosamente');
-      } catch (error) {
-        console.error('Error al eliminar proyecto:', error);
-        showNotification('error', 'Error al eliminar el proyecto');
-      }
-    }
-  };
+  const handleEdit = (project) => {
+    setModalType("edit")
+    setSelectedProject(project)
+    setModalVisible(true)
+  }
 
   const handleEditParcialidades = (project) => {
-    setSelectedProject(project);
-    setShowParcialidadesModal(true);
-  };
+    setSelectedProject(project)
+    setShowParcialidadesModal(true)
+  }
+
+  const handleDeleteProject = async (projectId) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este proyecto?")) {
+      try {
+        await proyectoService.eliminar(projectId)
+        await cargarDatos()
+        showNotification("success", "Proyecto eliminado exitosamente")
+      } catch (error) {
+        console.error("Error al eliminar proyecto:", error)
+        showNotification("error", "Error al eliminar el proyecto")
+      }
+    }
+  }
 
   const handleLogout = () => {
-    authService.logout();
-    showNotification('info', 'Sesión cerrada correctamente');
-    onLogout();
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN'
-    }).format(amount);
-  };
+    authService.logout()
+    showNotification("info", "Sesión cerrada correctamente")
+    onLogout()
+  }
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('es-MX');
-  };
+    if (!dateString) return "N/A"
+    return new Date(dateString).toLocaleDateString("es-MX")
+  }
 
   const getFormaDePagoText = (formaDePago) => {
     const formas = {
-      'PUE': 'PUE',
-      'PARCIALIDADES': 'Parcial',
-      'DIFERIDO': 'Diferido'
-    };
-    return formas[formaDePago] || formaDePago;
-  };
+      PUE: "PUE",
+      PARCIALIDADES: "PARCIALIDADES",
+      DIFERIDO: "Diferido",
+    }
+    return formas[formaDePago] || formaDePago
+  }
 
   const ChangePasswordModal = () => {
     const [formData, setFormData] = useState({
-      contrasenaActual: '',
-      contrasenaNueva: '',
-      confirmarContrasena: ''
-    });
-    const [saving, setSaving] = useState(false);
+      contrasenaActual: "",
+      contrasenaNueva: "",
+      confirmarContrasena: "",
+    })
+    const [saving, setSaving] = useState(false)
 
     const handleSubmit = async (e) => {
-      e.preventDefault();
-      setSaving(true);
+      e.preventDefault()
+      setSaving(true)
 
       if (formData.contrasenaNueva !== formData.confirmarContrasena) {
-        showNotification('error', 'Las contraseñas nuevas no coinciden');
-        setSaving(false);
-        return;
+        showNotification("error", "Las contraseñas nuevas no coinciden")
+        setSaving(false)
+        return
       }
 
       try {
         await authService.cambiarContrasena(
           formData.contrasenaActual,
           formData.contrasenaNueva,
-          formData.confirmarContrasena
-        );
-        showNotification('success', 'Contraseña cambiada exitosamente');
-        setShowChangePassword(false);
+          formData.confirmarContrasena,
+        )
+        showNotification("success", "Contraseña cambiada exitosamente")
+        setShowChangePassword(false)
       } catch (error) {
-        const errorMessage = typeof error === 'string' ? error : 'Error al cambiar contraseña';
-        showNotification('error', errorMessage);
+        const errorMessage = typeof error === "string" ? error : "Error al cambiar contraseña"
+        showNotification("error", errorMessage)
       } finally {
-        setSaving(false);
+        setSaving(false)
       }
-    };
+    }
 
     return (
       <div className="modal-overlay">
         <div className="modal-content">
           <div className="modal-header">
             <h3>Cambiar Contraseña</h3>
-            <button className="close-btn" onClick={() => setShowChangePassword(false)}>×</button>
+            <button className="close-btn" onClick={() => setShowChangePassword(false)}>
+              ×
+            </button>
           </div>
           <form onSubmit={handleSubmit} className="client-form">
             <div className="form-group">
@@ -163,7 +155,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
               <input
                 type="password"
                 value={formData.contrasenaActual}
-                onChange={(e) => setFormData({...formData, contrasenaActual: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, contrasenaActual: e.target.value })}
                 required
                 disabled={saving}
               />
@@ -173,7 +165,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
               <input
                 type="password"
                 value={formData.contrasenaNueva}
-                onChange={(e) => setFormData({...formData, contrasenaNueva: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, contrasenaNueva: e.target.value })}
                 required
                 disabled={saving}
               />
@@ -183,31 +175,133 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
               <input
                 type="password"
                 value={formData.confirmarContrasena}
-                onChange={(e) => setFormData({...formData, confirmarContrasena: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, confirmarContrasena: e.target.value })}
                 required
                 disabled={saving}
               />
             </div>
             <div className="modal-actions">
-              <button type="button" className="cancel-btn" onClick={() => setShowChangePassword(false)} disabled={saving}>
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => setShowChangePassword(false)}
+                disabled={saving}
+              >
                 Cancelar
               </button>
               <button type="submit" className="save-btn" disabled={saving}>
-                {saving ? 'Cambiando...' : 'Cambiar Contraseña'}
+                {saving ? "Cambiando..." : "Cambiar Contraseña"}
               </button>
             </div>
           </form>
         </div>
       </div>
-    );
-  };
+    )
+  }
+
+  const filterProjectsByDate = (proyectos) => {
+    if (dateFilter.type === "all") return proyectos
+
+    const now = new Date()
+    let startDate, endDate
+
+    switch (dateFilter.type) {
+      case "thisMonth":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+        break
+      case "lastMonth":
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0)
+        break
+      case "thisYear":
+        startDate = new Date(now.getFullYear(), 0, 1)
+        endDate = new Date(now.getFullYear(), 11, 31)
+        break
+      case "lastYear":
+        startDate = new Date(now.getFullYear() - 1, 0, 1)
+        endDate = new Date(now.getFullYear() - 1, 11, 31)
+        break
+      case "custom":
+        if (!dateFilter.startDate || !dateFilter.endDate) return proyectos
+        startDate = new Date(dateFilter.startDate)
+        endDate = new Date(dateFilter.endDate)
+        break
+      default:
+        return proyectos
+    }
+
+    return proyectos.filter((proyecto) => {
+      const fechaCreacion = new Date(proyecto.fechaCreacion || proyecto.fechaInicio)
+      return fechaCreacion >= startDate && fechaCreacion <= endDate
+    })
+  }
+
+  const handleDateFilterChange = (type) => {
+    setDateFilter({ ...dateFilter, type })
+    if (type !== "custom") {
+      setDateFilter((prev) => ({ ...prev, startDate: "", endDate: "" }))
+    }
+  }
+
+  const handleCustomDateChange = (field, value) => {
+    setDateFilter((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const getDateFilterLabel = () => {
+    switch (dateFilter.type) {
+      case "thisMonth":
+        return "Este Mes"
+      case "lastMonth":
+        return "Mes Anterior"
+      case "thisYear":
+        return "Este Año"
+      case "lastYear":
+        return "Año Anterior"
+      case "custom":
+        return "Rango Personalizado"
+      default:
+        return "Todos los Tiempos"
+    }
+  }
 
   if (loading) {
     return (
       <div className="loading-container">
         <div className="loading-spinner">Cargando proyectos...</div>
       </div>
-    );
+    )
+  }
+
+  const calcularParcialidadesPagadas = (proyecto) => {
+    if (proyecto.formaDePago === "PUE") {
+      return "N/A"
+    }
+
+    if (!proyecto.facturasParcialidades || proyecto.facturasParcialidades.length === 0) {
+      return 0
+    }
+
+    // For DIFERIDO and PARCIALIDADES, return total count of registered parcialidades
+    return proyecto.facturasParcialidades.length
+  }
+
+  const calcularTotalPagado = (proyecto) => {
+    if (!proyecto.facturasParcialidades || proyecto.facturasParcialidades.length === 0) {
+      return 0
+    }
+    return proyecto.facturasParcialidades.reduce((sum, p) => sum + (Number.parseFloat(p.monto) || 0), 0)
+  }
+
+  const calcularPorcentajePagado = (proyecto) => {
+    if (proyecto.formaDePago === "PUE") {
+      // For PUE projects: 0% if not closed, 100% if closed
+      return proyecto.facturaCerrada ? 100 : 0
+    }
+
+    // For PARCIALIDADES and DIFERIDO, calculate based on actual payments
+    const totalPagado = calcularTotalPagado(proyecto)
+    return proyecto.montoTotal > 0 ? (totalPagado / proyecto.montoTotal) * 100 : 0
   }
 
   return (
@@ -218,15 +312,15 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
             <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo" />
           </div>
         </div>
-        
+
         <nav className="sidebar-nav">
-          <button className="nav-item" onClick={() => onNavigate('dashboard')}>
+          <button className="nav-item" onClick={() => onNavigate("dashboard")}>
             <span className="nav-icon">
               <LayoutDashboard size={16} />
             </span>
             Dashboard
           </button>
-          <button className="nav-item" onClick={() => onNavigate('clientes')}>
+          <button className="nav-item" onClick={() => onNavigate("clientes")}>
             <span className="nav-icon">
               <Users size={16} />
             </span>
@@ -239,7 +333,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
             Proyectos
           </button>
         </nav>
-        
+
         <div className="sidebar-footer">
           <button className="change-password-btn" onClick={() => setShowChangePassword(true)}>
             <span className="nav-icon">
@@ -259,7 +353,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
       <main className="contenido">
         <div className="content-header">
           <div className="user-info">
-            <span>{authService.getCurrentUser()?.nombre || 'Administrador'}</span>
+            <span>{authService.getCurrentUser()?.nombre || "Administrador"}</span>
             <span className="user-role">Admin</span>
           </div>
         </div>
@@ -267,27 +361,92 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
         <div className="page-header">
           <h2>Todos los Proyectos ({filteredProyectos.length})</h2>
           <div className="header-actions">
-            <button className="btn-agregar" onClick={handleAddProject}>
+            <button className="btn-agregar" onClick={() => handleEdit(null)}>
               Agregar Proyecto
             </button>
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Buscar Proyectos"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-              <span className="search-icon">
-                <span className="nav-icon">
+            <div className="filters-container">
+              <div className="search-container">
+                <input
+                  type="text"
+                  placeholder="Buscar Proyectos"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+                <span className="search-icon">
+                  <span className="nav-icon">
                     <Search size={16} />
                   </span>
-              </span>
+                </span>
+              </div>
+              <div className="date-filter-container">
+                <button className="date-filter-btn-compact" onClick={() => setShowDateFilter(!showDateFilter)}>
+                  <Calendar size={16} />
+                  {getDateFilterLabel()}
+                </button>
+                {showDateFilter && (
+                  <div className="date-filter-dropdown-compact">
+                    <div className="filter-options-compact">
+                      <button
+                        className={dateFilter.type === "all" ? "active" : ""}
+                        onClick={() => handleDateFilterChange("all")}
+                      >
+                        Todos
+                      </button>
+                      <button
+                        className={dateFilter.type === "thisMonth" ? "active" : ""}
+                        onClick={() => handleDateFilterChange("thisMonth")}
+                      >
+                        Este Mes
+                      </button>
+                      <button
+                        className={dateFilter.type === "lastMonth" ? "active" : ""}
+                        onClick={() => handleDateFilterChange("lastMonth")}
+                      >
+                        Mes Anterior
+                      </button>
+                      <button
+                        className={dateFilter.type === "thisYear" ? "active" : ""}
+                        onClick={() => handleDateFilterChange("thisYear")}
+                      >
+                        Este Año
+                      </button>
+                      <button
+                        className={dateFilter.type === "lastYear" ? "active" : ""}
+                        onClick={() => handleDateFilterChange("lastYear")}
+                      >
+                        Año Anterior
+                      </button>
+                      <button
+                        className={dateFilter.type === "custom" ? "active" : ""}
+                        onClick={() => handleDateFilterChange("custom")}
+                      >
+                        Personalizado
+                      </button>
+                    </div>
+                    {dateFilter.type === "custom" && (
+                      <div className="custom-date-inputs-compact">
+                        <input
+                          type="date"
+                          value={dateFilter.startDate}
+                          onChange={(e) => handleCustomDateChange("startDate", e.target.value)}
+                          placeholder="Fecha inicio"
+                        />
+                        <input
+                          type="date"
+                          value={dateFilter.endDate}
+                          onChange={(e) => handleCustomDateChange("endDate", e.target.value)}
+                          placeholder="Fecha fin"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Tabla de Proyectos */}
         <div className="clients-table-container">
           <table className="clients-table">
             <thead>
@@ -302,7 +461,9 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
                 <th>Fecha Inicio</th>
                 <th>Fecha Término</th>
                 <th>Facturado</th>
-                <th>Tipo de Pago</th>
+                <th>Forma de pago</th>
+                <th>Parcialidades Pagadas</th>
+                <th>% Pagado</th>
                 <th>PO</th>
                 <th>Factura Cerrada</th>
                 <th>Acciones</th>
@@ -314,35 +475,53 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
                   <td>{proyecto.idCliente}</td>
                   <td>{proyecto.nombreCliente}</td>
                   <td>{proyecto.idCotizacion}</td>
-                  <td>{formatCurrency(proyecto.montoTotal)}</td>
-                  <td>{proyecto.requiereLevantamientoTecnico ? 'Sí' : 'No'}</td>
-                  <td>{proyecto.realizado ? 'Sí' : 'No'}</td>
-                  <td>{proyecto.fincado ? 'Sí' : 'No'}</td>
+                  <td>
+                    {new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(proyecto.montoTotal)}
+                  </td>
+                  <td>{proyecto.requiereLevantamientoTecnico ? "Sí" : "No"}</td>
+                  <td>{proyecto.realizado ? "Sí" : "No"}</td>
+                  <td>{proyecto.fincado ? "Sí" : "No"}</td>
                   <td>{formatDate(proyecto.fechaInicio)}</td>
                   <td>{formatDate(proyecto.fechaTermino)}</td>
-                  <td>{proyecto.facturado ? 'Sí' : 'No'}</td>
-                  <td>{getFormaDePagoText(proyecto.formaDePago)}</td>
-                  <td>{proyecto.ordenCompra || 'N/A'}</td>
-                  <td>{proyecto.facturaCerrada ? 'Sí' : 'No'}</td>
+                  <td>{proyecto.facturado ? "Sí" : "No"}</td>
                   <td>
-                    <div className="action-buttons">
-                      <button 
-                        className="btn-actualizar"
-                        onClick={() => handleEditProject(proyecto)}
-                      >
-                        Editar
+                    <span className={`payment-type ${proyecto.formaDePago.toLowerCase()}`}>
+                      {getFormaDePagoText(proyecto.formaDePago)}
+                    </span>
+                  </td>
+                  <td>
+                    {proyecto.formaDePago === "PUE"
+                      ? "N/A"
+                      : calcularParcialidadesPagadas(proyecto)}
+                  </td>
+                  <td>
+                    <span
+                      className={`percentage ${calcularPorcentajePagado(proyecto) === 100 ? "complete" : "incomplete"}`}
+                    >
+                      {calcularPorcentajePagado(proyecto).toFixed(1)}%
+                    </span>
+                  </td>
+                  <td>{proyecto.ordenCompra || "N/A"}</td>
+                  <td>{proyecto.facturaCerrada ? "Sí" : "No"}</td>
+                  <td>
+                    <div className="actions-container">
+                      <button className="btn-actualizar" onClick={() => handleEdit(proyecto)} title="Actualizar">
+                        Actualizar
                       </button>
-                      {(proyecto.formaDePago === 'PARCIALIDADES' || proyecto.formaDePago === 'DIFERIDO') && (
-                        <button 
-                          className="btn-parcialidades"
+                      {(proyecto.formaDePago === "PARCIALIDADES" || proyecto.formaDePago === "DIFERIDO") && (
+                        <button
+                          className={`btn-parcialidades ${!proyecto.facturado ? "disabled" : ""}`}
                           onClick={() => handleEditParcialidades(proyecto)}
+                          title="Editar parcialidades"
+                          disabled={!proyecto.facturado}
                         >
-                          Editar Parcialidades
+                          Editar parcialidades
                         </button>
                       )}
-                      <button 
+                      <button
                         className="btn-eliminar"
                         onClick={() => handleDeleteProject(proyecto.id)}
+                        title="Eliminar proyecto"
                       >
                         Eliminar
                       </button>
@@ -375,122 +554,193 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
         {showChangePassword && <ChangePasswordModal />}
       </main>
     </div>
-  );
-};
+  )
+}
 
 // Componente Modal para Proyectos OPTIMIZADO
 const ProjectModal = ({ modalType, selectedProject, clientes, onClose, onSave }) => {
   const [formData, setFormData] = useState({
-    idCotizacion: selectedProject?.idCotizacion || '',
-    idCliente: selectedProject?.idCliente || '',
-    montoTotal: selectedProject?.montoTotal || '',
+    idCotizacion: selectedProject?.idCotizacion || "",
+    idCliente: selectedProject?.idCliente || "",
+    montoTotal: selectedProject?.montoTotal || "",
     requiereLevantamientoTecnico: selectedProject?.requiereLevantamientoTecnico || false,
     realizado: selectedProject?.realizado || false,
     fincado: selectedProject?.fincado || false,
-    fechaInicio: selectedProject?.fechaInicio || '',
-    fechaTermino: selectedProject?.fechaTermino || '',
-    ordenCompra: selectedProject?.ordenCompra || '',
+    fechaInicio: selectedProject?.fechaInicio || "",
+    fechaTermino: selectedProject?.fechaTermino || "",
+    ordenCompra: selectedProject?.ordenCompra || "",
     facturado: selectedProject?.facturado || false,
-    formaDePago: selectedProject?.formaDePago || 'PUE',
-    folioControl: selectedProject?.folioControl || '',
-    folioFiscal: selectedProject?.folioFiscal || '',
+    formaDePago: selectedProject?.formaDePago || "PUE",
+    folioControl: selectedProject?.folioControl || "",
+    folioFiscal: selectedProject?.folioFiscal || "",
     facturasParcialidades: selectedProject?.facturasParcialidades || [],
-    facturaCerrada: selectedProject?.facturaCerrada || false
-  });
-  const [saving, setSaving] = useState(false);
-  const [warnings, setWarnings] = useState([]);
+    facturaCerrada: selectedProject?.facturaCerrada || false,
+    montoPagoPUE: "",
+    fechaPagoPUE: "",
+  })
+  const [saving, setSaving] = useState(false)
+  const [warnings, setWarnings] = useState([])
+
+  useEffect(() => {
+    if (selectedProject && selectedProject.formaDePago === "PUE") {
+      const puePaymentKey = `pue_payment_${selectedProject.id}`
+      const storedPueData = localStorage.getItem(puePaymentKey)
+      if (storedPueData) {
+        const pueData = JSON.parse(storedPueData)
+        setFormData((prev) => ({
+          ...prev,
+          montoPagoPUE: pueData.monto || "",
+          fechaPagoPUE: pueData.fecha || "",
+        }))
+      }
+    }
+  }, [selectedProject])
 
   // Actualizar warnings cuando cambian los campos
   useEffect(() => {
-    updateWarnings();
-  }, [formData]);
+    validateForm()
+  }, [formData])
 
-  const updateWarnings = () => {
-    const newWarnings = [];
+  const validateForm = () => {
+    const newWarnings = []
 
-    if (!formData.requiereLevantamientoTecnico && !formData.realizado) {
-      newWarnings.push('Campo "Realizado" deshabilitado: No requiere levantamiento técnico');
+    // PUE projects can be facturado without payment initially
+    if (formData.formaDePago === "PUE" && formData.facturado && formData.montoPagoPUE) {
+      if (Number.parseFloat(formData.montoPagoPUE) !== Number.parseFloat(formData.montoTotal)) {
+        newWarnings.push("El monto de pago debe ser igual al monto total del proyecto")
+      }
     }
 
-    if (formData.requiereLevantamientoTecnico && !formData.realizado) {
-      newWarnings.push('Complete el levantamiento técnico para continuar');
-    }
-
-    if (!formData.idCotizacion || !formData.montoTotal) {
-      newWarnings.push('Complete la cotización (ID y monto) para continuar');
-    }
-
-    if (!formData.fincado) {
-      newWarnings.push('Fechas deshabilitadas: El proyecto no está fincado');
-    }
-
-    if (formData.fincado && (!formData.fechaInicio || !formData.fechaTermino)) {
-      newWarnings.push('Defina fechas de inicio y término para continuar');
-    }
-
-    if (!formData.facturado) {
-      newWarnings.push('Folios deshabilitados: El proyecto no está facturado');
-    }
-
-    setWarnings(newWarnings);
-  };
+    setWarnings(newWarnings)
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
+    e.preventDefault()
+    setSaving(true)
+    setWarnings([])
 
     try {
-      const dataToSend = {
-        ...formData,
-        montoTotal: parseFloat(formData.montoTotal),
-        // NO crear parcialidades automáticamente - dejar vacío para gestionar después
-        facturasParcialidades: []
-      };
-
-      if (modalType === 'add') {
-        await proyectoService.crear(dataToSend);
-        showNotification('success', 'Proyecto agregado exitosamente');
-      } else {
-        await proyectoService.actualizar(selectedProject.id, dataToSend);
-        showNotification('success', 'Proyecto actualizado exitosamente');
+      // Basic form validation
+      if (!formData.idCotizacion || !formData.idCliente || !formData.montoTotal) {
+        showNotification("error", "Complete todos los campos obligatorios")
+        setSaving(false)
+        return
       }
-      
-      await onSave();
-      onClose();
+
+      // PUE payment validation only if payment fields are provided
+      if (formData.formaDePago === "PUE" && formData.montoPagoPUE) {
+        const montoPago = Number.parseFloat(formData.montoPagoPUE)
+        const montoTotal = Number.parseFloat(formData.montoTotal)
+
+        if (montoPago !== montoTotal) {
+          showNotification("error", "El monto de pago debe ser igual al monto total del proyecto")
+          setSaving(false)
+          return
+        }
+      }
+
+      const projectData = {
+        idCotizacion: formData.idCotizacion,
+        idCliente: formData.idCliente,
+        montoTotal: Number.parseFloat(formData.montoTotal),
+        requiereLevantamientoTecnico: formData.requiereLevantamientoTecnico,
+        realizado: formData.realizado,
+        fincado: formData.fincado,
+        fechaInicio: formData.fechaInicio || null,
+        fechaTermino: formData.fechaTermino || null,
+        ordenCompra: formData.ordenCompra,
+        facturado: formData.facturado,
+        formaDePago: formData.formaDePago,
+        folioControl: formData.folioControl || null,
+        folioFiscal: formData.folioFiscal || null,
+        cliente: { id: formData.idCliente },
+      }
+
+      // Handle PUE payments - always send empty array to avoid backend conflicts
+      if (formData.formaDePago === "PUE") {
+        const isPagadoCompleto =
+          formData.montoPagoPUE && Number.parseFloat(formData.montoPagoPUE) >= Number.parseFloat(formData.montoTotal)
+        projectData.facturaCerrada = isPagadoCompleto || false
+        projectData.facturasParcialidades = [] // Always empty for PUE to avoid backend conflicts
+      } else {
+        projectData.facturasParcialidades = formData.facturasParcialidades || []
+        projectData.facturaCerrada = false
+      }
+
+      const url = selectedProject
+        ? `http://localhost:8080/api/proyectos/${selectedProject.id}`
+        : "http://localhost:8080/api/proyectos"
+      const method = selectedProject ? "PUT" : "POST"
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(projectData),
+      })
+
+      if (response.ok) {
+        const savedProject = await response.json()
+
+        // Store PUE payment data in localStorage after successful save
+        if (formData.formaDePago === "PUE" && (formData.montoPagoPUE || formData.fechaPagoPUE)) {
+          const projectId = savedProject.id || selectedProject?.id
+          if (projectId) {
+            const puePaymentKey = `pue_payment_${projectId}`
+            const puePaymentData = {
+              monto: formData.montoPagoPUE || "",
+              fecha: formData.fechaPagoPUE || "",
+            }
+            localStorage.setItem(puePaymentKey, JSON.stringify(puePaymentData))
+          }
+        }
+
+        showNotification(
+          "success",
+          selectedProject ? "Proyecto actualizado exitosamente" : "Proyecto creado exitosamente",
+        )
+        onClose()
+        onSave()
+      } else {
+        const errorData = await response.json()
+        showNotification("error", errorData.message || "Error al guardar el proyecto")
+      }
     } catch (error) {
-      console.error('Error al guardar proyecto:', error);
-      const errorMessage = typeof error === 'string' ? error : 'Error al guardar el proyecto';
-      showNotification('error', errorMessage);
+      console.error("Error:", error)
+      showNotification("error", "Error de conexión")
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    const { name, value, type, checked } = e.target
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
+      [name]: type === "checkbox" ? checked : value,
+    }))
+  }
 
   // Lógica de habilitación de campos
-  const isRealizadoEnabled = formData.requiereLevantamientoTecnico;
-  const isCotizacionEnabled = !formData.requiereLevantamientoTecnico || formData.realizado;
-  const isFincadoEnabled = formData.idCotizacion && formData.montoTotal;
-  const isFechasEnabled = formData.fincado;
-  const isFormaPagoEnabled = isFechasEnabled && formData.fechaInicio && formData.fechaTermino;
-  const isFoliosEnabled = formData.facturado;
+  const isRealizadoEnabled = formData.requiereLevantamientoTecnico
+  const isCotizacionEnabled = !formData.requiereLevantamientoTecnico || formData.realizado
+  const isFincadoEnabled = formData.idCotizacion && formData.montoTotal
+  const isFechasEnabled = formData.fincado
+  const isFormaPagoEnabled = isFechasEnabled && formData.fechaInicio && formData.fechaTermino
+  const isFoliosEnabled = formData.facturado
 
   return (
     <div className="modal-overlay">
       <div className="modal-optimized">
         <div className="modal-header">
-          <h2>{modalType === 'add' ? 'Agregar Proyecto' : 'Editar Proyecto'}</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <h2>{modalType === "add" ? "Agregar Proyecto" : "Editar Proyecto"}</h2>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
         </div>
-        
-        {/* Mostrar warnings */}
+
         {warnings.length > 0 && (
           <div className="warnings-section">
             {warnings.map((warning, index) => (
@@ -500,9 +750,8 @@ const ProjectModal = ({ modalType, selectedProject, clientes, onClose, onSave })
             ))}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="form-proyecto-optimized">
-          {/* Grid de 3 columnas para aprovechar el espacio */}
           <div className="form-grid-3">
             {/* Columna 1: Cliente y Levantamiento */}
             <div className="form-column">
@@ -518,7 +767,7 @@ const ProjectModal = ({ modalType, selectedProject, clientes, onClose, onSave })
                     disabled={saving}
                   >
                     <option value="">Seleccionar cliente</option>
-                    {clientes.map(cliente => (
+                    {clientes.map((cliente) => (
                       <option key={cliente.id} value={cliente.idCliente}>
                         {cliente.idCliente} - {cliente.nombre}
                       </option>
@@ -668,20 +917,13 @@ const ProjectModal = ({ modalType, selectedProject, clientes, onClose, onSave })
                     />
                     Facturado
                   </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="facturaCerrada"
-                      checked={formData.facturaCerrada}
-                      onChange={handleChange}
-                      disabled={saving || !isFoliosEnabled}
-                    />
-                    Factura Cerrada
-                  </label>
                 </div>
-                
+              </div>
+
+              <div className="form-section-compact">
+                <h3>8. Folios</h3>
                 <div className="form-group">
-                  <label>Folio Control:</label>
+                  <label>Folio de Control:</label>
                   <input
                     type="text"
                     name="folioControl"
@@ -702,20 +944,74 @@ const ProjectModal = ({ modalType, selectedProject, clientes, onClose, onSave })
                 </div>
               </div>
 
-              {/* Información sobre parcialidades */}
-              {formData.formaDePago === 'PARCIALIDADES' && (
-                <div className="info-section">
-                  <h4>📝 Información sobre Parcialidades</h4>
-                  <p>Las parcialidades permiten dividir el pago en múltiples pagos hasta completar el monto total. Se pueden gestionar después de crear el proyecto usando el botón "Editar Parcialidades".</p>
+              {formData.formaDePago === "PUE" && formData.facturado && (
+                <div className="form-section-compact">
+                  <h3>9. Pago PUE (Opcional)</h3>
+                  <p className="info-text">Puede completar estos campos ahora o actualizarlos posteriormente</p>
+                  <div className="form-group">
+                    <label>Monto Pagado:</label>
+                    <input
+                      type="number"
+                      name="montoPagoPUE"
+                      value={formData.montoPagoPUE}
+                      onChange={handleChange}
+                      step="0.01"
+                      min="0"
+                      disabled={saving}
+                      placeholder={`Debe ser ${new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(formData.montoTotal)}`}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Fecha de Pago:</label>
+                    <input
+                      type="date"
+                      name="fechaPagoPUE"
+                      value={formData.fechaPagoPUE}
+                      onChange={handleChange}
+                      disabled={saving}
+                    />
+                  </div>
                 </div>
               )}
 
-              {formData.formaDePago === 'DIFERIDO' && (
-                <div className="info-section">
-                  <h4>📅 Información sobre Pago Diferido</h4>
-                  <p>El pago diferido es un solo pago por el monto total, pero programado para una fecha posterior. Se puede definir la fecha después de crear el proyecto.</p>
-                </div>
-              )}
+              {/* Información sobre formas de pago */}
+              <div className="form-section-compact">
+                <h3>ℹ️ Información</h3>
+                {formData.formaDePago === "PARCIALIDADES" && (
+                  <div className="info-message parcialidades">
+                    <p>
+                      <strong>PARCIALIDADES:</strong>
+                    </p>
+                    <p>
+                      Múltiples pagos hasta completar el monto total. Puede agregar las parcialidades después de crear
+                      el proyecto.
+                    </p>
+                  </div>
+                )}
+                {formData.formaDePago === "DIFERIDO" && (
+                  <div className="info-message diferido">
+                    <p>
+                      <strong>DIFERIDO:</strong>
+                    </p>
+                    <p>
+                      Un solo pago por el monto total en fecha posterior. Puede configurar el pago después de crear el
+                      proyecto.
+                    </p>
+                  </div>
+                )}
+                {formData.formaDePago === "PUE" && (
+                  <div className="info-message pue">
+                    <p>
+                      <strong>PUE:</strong>
+                    </p>
+                    <p>
+                      {formData.facturado
+                        ? "Complete el monto y fecha de pago si desea registrar el pago ahora."
+                        : "Pago único. Active 'Facturado' para registrar el pago."}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -724,189 +1020,224 @@ const ProjectModal = ({ modalType, selectedProject, clientes, onClose, onSave })
               Cancelar
             </button>
             <button type="submit" disabled={saving}>
-              {saving ? 'Guardando...' : (modalType === 'add' ? 'Crear Proyecto' : 'Actualizar Proyecto')}
+              {saving ? "Guardando..." : modalType === "add" ? "Agregar Proyecto" : "Actualizar Proyecto"}
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Componente Modal para Parcialidades CON VALIDACIONES MEJORADAS
 const ParcialidadesModal = ({ proyecto, onClose, onSave }) => {
-  const [parcialidades, setParcialidades] = useState(proyecto.facturasParcialidades || []);
-  const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState([]);
+  const [parcialidades, setParcialidades] = useState(proyecto.facturasParcialidades || [])
+  const [saving, setSaving] = useState(false)
+  const [errors, setErrors] = useState([])
 
   const calcularTotalPagado = () => {
-    return parcialidades.reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
-  };
+    return parcialidades.reduce((sum, p) => sum + (Number.parseFloat(p.monto) || 0), 0)
+  }
 
   const calcularPorcentajePagado = () => {
-    const totalPagado = calcularTotalPagado();
-    return proyecto.montoTotal > 0 ? (totalPagado / proyecto.montoTotal) * 100 : 0;
-  };
+    const totalPagado = calcularTotalPagado()
+    return proyecto.montoTotal > 0 ? (totalPagado / proyecto.montoTotal) * 100 : 0
+  }
 
   const validarParcialidades = () => {
-    const newErrors = [];
-    const totalPagado = calcularTotalPagado();
-    const montoTotal = parseFloat(proyecto.montoTotal);
+    const newErrors = []
+    const totalPagado = calcularTotalPagado()
+    const montoTotal = Number.parseFloat(proyecto.montoTotal)
 
     // Validación específica para DIFERIDO
-    if (proyecto.formaDePago === 'DIFERIDO') {
+    if (proyecto.formaDePago === "DIFERIDO") {
       if (parcialidades.length === 0) {
-        newErrors.push('Los proyectos DIFERIDOS requieren exactamente una parcialidad');
+        newErrors.push("Los proyectos DIFERIDOS requieren exactamente una parcialidad")
       } else if (parcialidades.length > 1) {
-        newErrors.push('Los proyectos DIFERIDOS solo pueden tener una parcialidad');
+        newErrors.push("Los proyectos DIFERIDOS solo pueden tener una parcialidad")
       } else {
-        const parcialidad = parcialidades[0];
-        const montoParcialidad = parseFloat(parcialidad.monto) || 0;
-        
+        const parcialidad = parcialidades[0]
+        const montoParcialidad = Number.parseFloat(parcialidad.monto) || 0
+
         if (montoParcialidad !== montoTotal) {
-          newErrors.push(`En proyectos DIFERIDOS, la parcialidad debe ser exactamente ${formatCurrency(montoTotal)}`);
+          newErrors.push(
+            `En proyectos DIFERIDOS, la parcialidad debe ser exactamente ${new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(montoTotal)}`,
+          )
         }
-        
+
         if (!parcialidad.fechaPago) {
-          newErrors.push('Los proyectos DIFERIDOS requieren fecha de pago');
+          newErrors.push("Los proyectos DIFERIDOS requieren fecha de pago")
         }
       }
     }
 
-    // Validación específica para PARCIALIDADES
-    if (proyecto.formaDePago === 'PARCIALIDADES') {
-      if (parcialidades.length === 0) {
-        newErrors.push('Los proyectos con PARCIALIDADES requieren al menos una parcialidad');
-      } else if (parcialidades.length === 1) {
-        newErrors.push('Los proyectos con PARCIALIDADES requieren al menos 2 parcialidades');
-      } else {
+    if (proyecto.formaDePago === "PARCIALIDADES") {
+      if (parcialidades.length > 0) {
         // Validar que no exceda el monto total
         if (totalPagado > montoTotal) {
-          newErrors.push(`El total de parcialidades (${formatCurrency(totalPagado)}) no puede exceder el monto del proyecto (${formatCurrency(montoTotal)})`);
+          newErrors.push(
+            `El total de parcialidades (${new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(totalPagado)}) no puede exceder el monto del proyecto (${new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(montoTotal)})`,
+          )
         }
-        
+
         // Validar que cada parcialidad tenga monto
         parcialidades.forEach((parcialidad, index) => {
-          const monto = parseFloat(parcialidad.monto) || 0;
+          const monto = Number.parseFloat(parcialidad.monto) || 0
           if (monto <= 0) {
-            newErrors.push(`La parcialidad ${index + 1} debe tener un monto válido mayor a 0`);
+            newErrors.push(`La parcialidad ${index + 1} debe tener un monto válido mayor a 0`)
           }
           if (monto > montoTotal) {
-            newErrors.push(`La parcialidad ${index + 1} (${formatCurrency(monto)}) no puede ser mayor al monto total`);
+            newErrors.push(
+              `La parcialidad ${index + 1} (${new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(monto)}) no puede ser mayor al monto total`,
+            )
           }
-        });
+        })
       }
     }
 
-    setErrors(newErrors);
-    return newErrors.length === 0;
-  };
+    setErrors(newErrors)
+    return newErrors.length === 0
+  }
 
   const addParcialidad = () => {
-    if (proyecto.formaDePago === 'DIFERIDO' && parcialidades.length >= 1) {
-      showNotification('warning', 'Los proyectos DIFERIDOS solo pueden tener una parcialidad');
-      return;
+    if (proyecto.formaDePago === "DIFERIDO" && parcialidades.length >= 1) {
+      showNotification("warning", "Los proyectos DIFERIDOS solo pueden tener una parcialidad")
+      return
     }
 
     const nuevaParcialidad = {
-      monto: proyecto.formaDePago === 'DIFERIDO' ? proyecto.montoTotal : '',
-      complementoN: '',
-      fechaPago: '',
-      descripcion: proyecto.formaDePago === 'DIFERIDO' ? 'Pago diferido' : ''
-    };
+      monto: proyecto.formaDePago === "DIFERIDO" ? proyecto.montoTotal : "",
+      complementoN: "",
+      fechaPago: "",
+      descripcion: proyecto.formaDePago === "DIFERIDO" ? "Pago diferido" : "",
+    }
 
-    setParcialidades([...parcialidades, nuevaParcialidad]);
-  };
+    setParcialidades([...parcialidades, nuevaParcialidad])
+  }
 
   const removeParcialidad = (index) => {
-    setParcialidades(parcialidades.filter((_, i) => i !== index));
-  };
+    setParcialidades(parcialidades.filter((_, i) => i !== index))
+  }
 
   const updateParcialidad = (index, field, value) => {
-    setParcialidades(parcialidades.map((parcialidad, i) => {
-      if (i === index) {
-        const updated = { ...parcialidad, [field]: value };
-        
-        // Para proyectos DIFERIDO, mantener el monto igual al total
-        if (proyecto.formaDePago === 'DIFERIDO' && field === 'monto') {
-          const monto = parseFloat(value) || 0;
-          if (monto !== proyecto.montoTotal) {
-            showNotification('warning', `En proyectos DIFERIDOS, el monto debe ser exactamente ${formatCurrency(proyecto.montoTotal)}`);
-            updated.monto = proyecto.montoTotal;
+    setParcialidades(
+      parcialidades.map((parcialidad, i) => {
+        if (i === index) {
+          const updated = { ...parcialidad, [field]: value }
+
+          // Para proyectos DIFERIDOS, mantener el monto igual al total
+          if (proyecto.formaDePago === "DIFERIDO" && field === "monto") {
+            const monto = Number.parseFloat(value) || 0
+            if (monto !== proyecto.montoTotal) {
+              showNotification(
+                "warning",
+                `En proyectos DIFERIDOS, el monto debe ser exactamente ${new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(proyecto.montoTotal)}`,
+              )
+              updated.monto = proyecto.montoTotal
+            }
           }
+
+          return updated
         }
-        
-        return updated;
-      }
-      return parcialidad;
-    }));
-  };
+        return parcialidad
+      }),
+    )
+  }
 
   const handleSave = async () => {
     if (!validarParcialidades()) {
-      showNotification('error', 'Por favor corrija los errores antes de guardar');
-      return;
+      showNotification("error", "Por favor corrija los errores antes de guardar")
+      return
     }
 
-    setSaving(true);
+    setSaving(true)
     try {
+      const totalPagado = calcularTotalPagado()
+      const montoTotal = Number.parseFloat(proyecto.montoTotal)
+      const isPagadoCompleto = totalPagado >= montoTotal
+
       const updatedProject = {
         ...proyecto,
-        facturasParcialidades: parcialidades
-      };
-      
-      await proyectoService.actualizar(proyecto.id, updatedProject);
-      showNotification('success', 'Parcialidades actualizadas exitosamente');
-      await onSave();
-      onClose();
-    } catch (error) {
-      console.error('Error al actualizar parcialidades:', error);
-      const errorMessage = typeof error === 'string' ? error : 'Error al actualizar las parcialidades';
-      showNotification('error', errorMessage);
-    } finally {
-      setSaving(false);
-    }
-  };
+        facturasParcialidades: parcialidades,
+        facturaCerrada: isPagadoCompleto,
+      }
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN'
-    }).format(amount);
-  };
+      await proyectoService.actualizar(proyecto.id, updatedProject)
+
+      if (isPagadoCompleto && !proyecto.facturaCerrada) {
+        showNotification("success", "Parcialidades actualizadas y factura marcada como cerrada automáticamente")
+      } else {
+        showNotification("success", "Parcialidades actualizadas exitosamente")
+      }
+
+      await onSave()
+      onClose()
+    } catch (error) {
+      console.error("Error al actualizar parcialidades:", error)
+      const errorMessage = typeof error === "string" ? error : "Error al actualizar las parcialidades"
+      showNotification("error", errorMessage)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   // Validar en tiempo real
   useEffect(() => {
-    validarParcialidades();
-  }, [parcialidades]);
+    validarParcialidades()
+  }, [parcialidades])
 
   return (
     <div className="modal-overlay">
       <div className="modal large">
         <div className="modal-header">
-          <h2>Editar Parcialidades - {proyecto.idCotizacion} ({proyecto.formaDePago})</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <h2>
+            Editar Parcialidades - {proyecto.idCotizacion} ({proyecto.formaDePago})
+          </h2>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
         </div>
-        
+
         <div className="parcialidades-info">
           <div className="info-card">
             <h3>Información del Proyecto</h3>
-            <p><strong>Cliente:</strong> {proyecto.nombreCliente}</p>
-            <p><strong>Monto Total:</strong> {formatCurrency(proyecto.montoTotal)}</p>
-            <p><strong>Forma de Pago:</strong> {proyecto.formaDePago}</p>
-            <p><strong>Total Asignado:</strong> {formatCurrency(calcularTotalPagado())}</p>
-            <p><strong>Porcentaje Asignado:</strong> {calcularPorcentajePagado().toFixed(2)}%</p>
-            <p><strong>Pendiente:</strong> {formatCurrency(proyecto.montoTotal - calcularTotalPagado())}</p>
-            
-            {proyecto.formaDePago === 'DIFERIDO' && (
+            <p>
+              <strong>Cliente:</strong> {proyecto.nombreCliente}
+            </p>
+            <p>
+              <strong>Monto Total:</strong>{" "}
+              {new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(proyecto.montoTotal)}
+            </p>
+            <p>
+              <strong>Forma de Pago:</strong> {proyecto.formaDePago}
+            </p>
+            <p>
+              <strong>Total Asignado:</strong>{" "}
+              {new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(calcularTotalPagado())}
+            </p>
+            <p>
+              <strong>Porcentaje Asignado:</strong> {calcularPorcentajePagado().toFixed(2)}%
+            </p>
+            <p>
+              <strong>Pendiente:</strong>{" "}
+              {new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(
+                proyecto.montoTotal - calcularTotalPagado(),
+              )}
+            </p>
+
+            {proyecto.formaDePago === "DIFERIDO" && (
               <div className="tipo-pago-info diferido">
-                <p><strong>📅 DIFERIDO:</strong> Un solo pago por el monto total en fecha posterior</p>
+                <p>
+                  <strong>📅 DIFERIDO:</strong> Un solo pago por el monto total en fecha posterior
+                </p>
               </div>
             )}
-            
-            {proyecto.formaDePago === 'PARCIALIDADES' && (
+
+            {proyecto.formaDePago === "PARCIALIDADES" && (
               <div className="tipo-pago-info parcialidades">
-                <p><strong>📝 PARCIALIDADES:</strong> Múltiples pagos hasta completar el monto total</p>
+                <p>
+                  <strong>📝 PARCIALIDADES:</strong> Múltiples pagos hasta completar el monto total
+                </p>
               </div>
             )}
           </div>
@@ -927,37 +1258,32 @@ const ParcialidadesModal = ({ proyecto, onClose, onSave }) => {
         <div className="parcialidades-section">
           <div className="parcialidades-header">
             <h3>
-              {proyecto.formaDePago === 'DIFERIDO' ? 'Pago Diferido' : 'Parcialidades'} 
-              ({parcialidades.length})
+              {proyecto.formaDePago === "DIFERIDO" ? "Pago Diferido" : "Parcialidades"}({parcialidades.length})
             </h3>
-            <button 
-              type="button" 
-              onClick={addParcialidad} 
-              disabled={saving || (proyecto.formaDePago === 'DIFERIDO' && parcialidades.length >= 1)}
+            <button
+              type="button"
+              onClick={addParcialidad}
+              disabled={saving || (proyecto.formaDePago === "DIFERIDO" && parcialidades.length >= 1)}
             >
-              {proyecto.formaDePago === 'DIFERIDO' ? 'Agregar Pago Diferido' : 'Agregar Parcialidad'}
+              {proyecto.formaDePago === "DIFERIDO" ? "Agregar Pago Diferido" : "Agregar Parcialidad"}
             </button>
           </div>
-          
+
           {parcialidades.length === 0 && (
             <div className="empty-state">
-              <p>No hay {proyecto.formaDePago === 'DIFERIDO' ? 'pago diferido' : 'parcialidades'} configuradas</p>
-              <p>Haga clic en el botón de arriba para agregar {proyecto.formaDePago === 'DIFERIDO' ? 'el pago' : 'una parcialidad'}</p>
+              <p>No hay {proyecto.formaDePago === "DIFERIDO" ? "pago diferido" : "parcialidades"} configuradas</p>
+              <p>
+                Haga clic en el botón de arriba para agregar{" "}
+                {proyecto.formaDePago === "DIFERIDO" ? "el pago" : "una parcialidad"}
+              </p>
             </div>
           )}
-          
+
           {parcialidades.map((parcialidad, index) => (
             <div key={index} className="parcialidad-item">
               <div className="parcialidad-header">
-                <h4>
-                  {proyecto.formaDePago === 'DIFERIDO' ? 'Pago Diferido' : `Parcialidad ${index + 1}`}
-                </h4>
-                <button 
-                  type="button" 
-                  onClick={() => removeParcialidad(index)}
-                  disabled={saving}
-                  className="remove-btn"
-                >
+                <h4>{proyecto.formaDePago === "DIFERIDO" ? "Pago Diferido" : `Parcialidad ${index + 1}`}</h4>
+                <button type="button" onClick={() => removeParcialidad(index)} disabled={saving} className="remove-btn">
                   Eliminar
                 </button>
               </div>
@@ -966,7 +1292,7 @@ const ParcialidadesModal = ({ proyecto, onClose, onSave }) => {
                   type="number"
                   placeholder="Monto"
                   value={parcialidad.monto}
-                  onChange={(e) => updateParcialidad(index, 'monto', e.target.value)}
+                  onChange={(e) => updateParcialidad(index, "monto", e.target.value)}
                   step="0.01"
                   min="0"
                   max={proyecto.montoTotal}
@@ -977,22 +1303,22 @@ const ParcialidadesModal = ({ proyecto, onClose, onSave }) => {
                   type="text"
                   placeholder="Complemento N"
                   value={parcialidad.complementoN}
-                  onChange={(e) => updateParcialidad(index, 'complementoN', e.target.value)}
+                  onChange={(e) => updateParcialidad(index, "complementoN", e.target.value)}
                   disabled={saving}
                 />
                 <input
                   type="date"
                   placeholder="Fecha de Pago"
                   value={parcialidad.fechaPago}
-                  onChange={(e) => updateParcialidad(index, 'fechaPago', e.target.value)}
+                  onChange={(e) => updateParcialidad(index, "fechaPago", e.target.value)}
                   disabled={saving}
-                  required={proyecto.formaDePago === 'DIFERIDO'}
+                  required={proyecto.formaDePago === "DIFERIDO"}
                 />
                 <input
                   type="text"
                   placeholder="Descripción"
                   value={parcialidad.descripcion}
-                  onChange={(e) => updateParcialidad(index, 'descripcion', e.target.value)}
+                  onChange={(e) => updateParcialidad(index, "descripcion", e.target.value)}
                   disabled={saving}
                 />
               </div>
@@ -1004,17 +1330,13 @@ const ParcialidadesModal = ({ proyecto, onClose, onSave }) => {
           <button type="button" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
-          <button 
-            type="button" 
-            onClick={handleSave} 
-            disabled={saving || errors.length > 0}
-          >
-            {saving ? 'Guardando...' : 'Guardar Parcialidades'}
+          <button type="button" onClick={handleSave} disabled={saving || errors.length > 0}>
+            {saving ? "Guardando..." : "Guardar Parcialidades"}
           </button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ListaProyectos;
+export default ListaProyectos
