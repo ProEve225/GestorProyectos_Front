@@ -349,9 +349,7 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
     <div className="lista-clientes-container">
       <div className="sidebar">
         <div className="sidebar-header">
-          <div className="logo-container">
-            <img src="src/assets/Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo" />
-          </div>
+          
         </div>
         
         <nav className="sidebar-nav">
@@ -392,12 +390,15 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
       </div>
 
       <main className="contenido">
+        <div className="logo-container">
+            <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo"/>
         <div className="content-header">
           <div className="user-info">
-            <span>{authService.getCurrentUser()?.nombre || 'Administrador'}</span>
+            <span>{authService.getCurrentUser()?.nombre || "Administrador"}</span>
             <span className="user-role">Admin</span>
           </div>
         </div>
+      </div>
 
         <div className="content-body">
           {error && <div className="error-message">{error}</div>}

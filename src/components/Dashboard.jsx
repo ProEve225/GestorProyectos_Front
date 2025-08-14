@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { clienteService } from "../services/clienteService"
 import { proyectoService } from "../services/proyectoService"
@@ -28,7 +26,7 @@ const Dashboard = ({ onNavigate, onLogout }) => {
 
   useEffect(() => {
     cargarEstadisticas()
-  }, [dateFilter]) // Added dateFilter dependency
+  }, [dateFilter])
 
   const cargarEstadisticas = async () => {
     try {
@@ -241,11 +239,8 @@ const Dashboard = ({ onNavigate, onLogout }) => {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
-          <div className="logo-container">
-            <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo" />
-          </div>
+         
         </div>
-
         <nav className="sidebar-nav">
           <div className="nav-item active">
             <span className="nav-icon">
@@ -286,13 +281,15 @@ const Dashboard = ({ onNavigate, onLogout }) => {
       {/* Main Content */}
       <main className="contenido">
         {/* Header */}
+        <div className="logo-container">
+            <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo"/>
         <div className="content-header">
           <div className="user-info">
             <span>{authService.getCurrentUser()?.nombre || "Administrador"}</span>
             <span className="user-role">Admin</span>
           </div>
         </div>
-
+      </div>
         {/* Content */}
         <div className="content-body">
           <div className="page-header">

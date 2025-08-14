@@ -8,17 +8,29 @@
 /* Sidebar actualizado para logo */
 .sidebar-logo {
   width: 300px;
-  height: 100px;
-  border-radius: 8px;
+  height: 150px;
+  border-radius: 2px;
   object-fit: contain;
   background: white;
-  padding: 4px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  justify-content: space-between;
+}
+
+.sidebar-header {
+  padding: 7.5rem;
+  border-bottom: 0px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar {
   width: 280px;
   background: linear-gradient(180deg, #3b82f6 0%, #1e40af 100%);
-  background-image: url("../assets/Fondo_sidebar.avif"), linear-gradient(180deg, #5d6275 0%, #5d6275 20%);
+  background-image: url("../assets/Fondo_sidebar.jpg"), linear-gradient(180deg, #5d6275 0%, #5d6275 20%);
   background-size: cover, cover;
   background-position: center, center;
   background-blend-mode: overlay;

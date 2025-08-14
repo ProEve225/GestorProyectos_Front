@@ -27,7 +27,7 @@
 }
 
 .sidebar-header {
-  padding: 1.5rem;
+  padding: 10rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -36,6 +36,7 @@
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
+  justify-content: space-between;
 }
 
 .sidebar-logo {
@@ -175,7 +176,7 @@
 
 .content-body {
   flex: 1;
-  padding: 2rem;
+  padding: 0rem;
   overflow-y: auto;
 }
 
@@ -269,7 +270,8 @@
 .clients-table-container {
   background: white;
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
@@ -596,14 +598,6 @@
   
   .main-content {
     margin-left: 0;
-  }
-  
-  .content-body {
-    padding: 1rem;
-  }
-  
-  .clients-table-container {
-    overflow-x: auto;
   }
   
   .search-input {

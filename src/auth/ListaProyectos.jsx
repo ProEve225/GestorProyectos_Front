@@ -5,6 +5,8 @@ import { authService } from "../services/authService"
 import { showNotification } from "../components/NotificationSystem"
 import "../CSS/ListaProyectos.css"
 import { Users, Folder, LayoutDashboard, Lock, LogOut, Search, Calendar } from "lucide-react"
+import ExcelExportModal from '../components/ExcelExportModal.jsx';
+import '../components/ExcelExportModal.css';
 
 const ListaProyectos = ({ onNavigate, onLogout }) => {
   const [proyectos, setProyectos] = useState([])
@@ -17,6 +19,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
   const [selectedProject, setSelectedProject] = useState(null)
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [showParcialidadesModal, setShowParcialidadesModal] = useState(false)
+  const [showExportModal, setShowExportModal] = useState(false)
 
   const [dateFilter, setDateFilter] = useState({
     type: "all", // 'all', 'custom', 'thisMonth', 'lastMonth', 'thisYear', 'lastYear'
@@ -308,9 +311,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
     <div className="contenedor-principal">
       <aside className="sidebar">
         <div className="sidebar-header">
-          <div className="logo-container">
-            <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo" />
-          </div>
+          
         </div>
 
         <nav className="sidebar-nav">
@@ -351,12 +352,15 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
       </aside>
 
       <main className="contenido">
+        <div className="logo-container">
+            <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo"/>
         <div className="content-header">
           <div className="user-info">
             <span>{authService.getCurrentUser()?.nombre || "Administrador"}</span>
             <span className="user-role">Admin</span>
           </div>
         </div>
+      </div>
 
         <div className="page-header">
           <h2>Todos los Proyectos ({filteredProyectos.length})</h2>
@@ -364,6 +368,21 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
             <button className="btn-agregar" onClick={() => handleEdit(null)}>
               Agregar Proyecto
             </button>
+
+            <button 
+            className="btn-primary export-btn" 
+            onClick={() => setShowExportModal(true)}
+            style={{
+            background: '#28a745',
+            marginLeft: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+            }}
+            >
+             Exportar a Excel
+            </button>
+
             <div className="filters-container">
               <div className="search-container">
                 <input
@@ -552,6 +571,12 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
         )}
 
         {showChangePassword && <ChangePasswordModal />}
+        <ExcelExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        proyectos={filteredProyectos}
+        onExport={() => {}}
+        />
       </main>
     </div>
   )
