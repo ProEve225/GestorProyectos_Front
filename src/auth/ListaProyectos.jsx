@@ -5,9 +5,9 @@ import { authService } from "../services/authService"
 import { showNotification } from "../components/NotificationSystem"
 import "../CSS/ListaProyectos.css"
 import { Users, Folder, LayoutDashboard, Lock, LogOut, Search, Calendar } from "lucide-react"
-import ExcelExportModal from '../components/ExcelExportModal.jsx';
-import '../components/ExcelExportModal.css';
-import logo from '../assets/Logo_ESIES.png';
+import ExcelExportModal from "../components/ExcelExportModal.jsx"
+import "../components/ExcelExportModal.css"
+import logo from "../assets/Logo_ESIES.png"
 
 const ListaProyectos = ({ onNavigate, onLogout }) => {
   const [proyectos, setProyectos] = useState([])
@@ -98,7 +98,9 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A"
-    return new Date(dateString).toLocaleDateString("es-MX")
+    const [year, month, day] = dateString.split("-")
+    const date = new Date(year, month - 1, day)
+    return date.toLocaleDateString("es-MX")
   }
 
   const getFormaDePagoText = (formaDePago) => {
@@ -228,15 +230,22 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
         break
       case "custom":
         if (!dateFilter.startDate || !dateFilter.endDate) return proyectos
-        startDate = new Date(dateFilter.startDate)
-        endDate = new Date(dateFilter.endDate)
+        const [startYear, startMonth, startDay] = dateFilter.startDate.split("-")
+        const [endYear, endMonth, endDay] = dateFilter.endDate.split("-")
+        startDate = new Date(startYear, startMonth - 1, startDay)
+        endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59) // Incluir todo el día final
         break
       default:
         return proyectos
     }
 
     return proyectos.filter((proyecto) => {
-      const fechaCreacion = new Date(proyecto.fechaCreacion || proyecto.fechaInicio)
+      const fechaCreacionString = proyecto.fechaCreacion || proyecto.fechaInicio
+      if (!fechaCreacionString) return false
+
+      const [year, month, day] = fechaCreacionString.split("-")
+      const fechaCreacion = new Date(year, month - 1, day)
+
       return fechaCreacion >= startDate && fechaCreacion <= endDate
     })
   }
@@ -311,9 +320,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
   return (
     <div className="contenedor-principal">
       <aside className="sidebar">
-        <div className="sidebar-header">
-          
-        </div>
+        <div className="sidebar-header"></div>
 
         <nav className="sidebar-nav">
           <button className="nav-item" onClick={() => onNavigate("dashboard")}>
@@ -354,14 +361,14 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
 
       <main className="contenido">
         <div className="logo-container">
-            <img src={logo} alt="Logo ESIES" className="sidebar-logo"/>
-        <div className="content-header">
-          <div className="user-info">
-            <span>{authService.getCurrentUser()?.nombre || "Administrador"}</span>
-            <span className="user-role">Admin</span>
+          <img src={logo || "/placeholder.svg"} alt="Logo ESIES" className="sidebar-logo" />
+          <div className="content-header">
+            <div className="user-info">
+              <span>{authService.getCurrentUser()?.nombre || "Administrador"}</span>
+              <span className="user-role">Admin</span>
+            </div>
           </div>
         </div>
-      </div>
 
         <div className="page-header">
           <h2>Todos los Proyectos ({filteredProyectos.length})</h2>
@@ -370,18 +377,18 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
               Agregar Proyecto
             </button>
 
-            <button 
-            className="btn-primary export-btn" 
-            onClick={() => setShowExportModal(true)}
-            style={{
-            background: '#28a745',
-            marginLeft: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-            }}
+            <button
+              className="btn-primary export-btn"
+              onClick={() => setShowExportModal(true)}
+              style={{
+                background: "#28a745",
+                marginLeft: "10px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
             >
-             Exportar a Excel
+              Exportar a Excel
             </button>
 
             <div className="filters-container">
@@ -509,11 +516,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
                       {getFormaDePagoText(proyecto.formaDePago)}
                     </span>
                   </td>
-                  <td>
-                    {proyecto.formaDePago === "PUE"
-                      ? "N/A"
-                      : calcularParcialidadesPagadas(proyecto)}
-                  </td>
+                  <td>{proyecto.formaDePago === "PUE" ? "N/A" : calcularParcialidadesPagadas(proyecto)}</td>
                   <td>
                     <span
                       className={`percentage ${calcularPorcentajePagado(proyecto) === 100 ? "complete" : "incomplete"}`}
@@ -573,10 +576,10 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
 
         {showChangePassword && <ChangePasswordModal />}
         <ExcelExportModal
-        isOpen={showExportModal}
-        onClose={() => setShowExportModal(false)}
-        proyectos={filteredProyectos}
-        onExport={() => {}}
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          proyectos={filteredProyectos}
+          onExport={() => {}}
         />
       </main>
     </div>
