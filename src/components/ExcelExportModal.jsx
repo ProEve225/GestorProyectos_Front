@@ -115,7 +115,13 @@ const ExcelExportModal = ({ isOpen, onClose, proyectos, onExport }) => {
   const formatearFechaProyecto = (fecha) => {
     if (!fecha) return "N/A"
     try {
-      const fechaObj = new Date(fecha)
+      const fechaString = fecha.toString()
+      if (fechaString.includes("-") && !fechaString.includes("T")) {
+        const [year, month, day] = fechaString.split("-").map(Number)
+        const fechaObj = new Date(year, month - 1, day)
+        return !isNaN(fechaObj.getTime()) ? fechaObj.toLocaleDateString("es-MX") : "N/A"
+      }
+      const fechaObj = new Date(fechaString)
       return !isNaN(fechaObj.getTime()) ? fechaObj.toLocaleDateString("es-MX") : "N/A"
     } catch {
       return fecha.toString()
@@ -125,9 +131,11 @@ const ExcelExportModal = ({ isOpen, onClose, proyectos, onExport }) => {
   const formatearFechaParcialidad = (fecha) => {
     if (!fecha) return "N/A"
     try {
-      let fechaString = fecha.toString()
+      const fechaString = fecha.toString()
       if (fechaString.includes("-") && !fechaString.includes("T")) {
-        fechaString += "T00:00:00"
+        const [year, month, day] = fechaString.split("-").map(Number)
+        const fechaObj = new Date(year, month - 1, day)
+        return !isNaN(fechaObj.getTime()) ? fechaObj.toLocaleDateString("es-MX") : "N/A"
       }
       const fechaObj = new Date(fechaString)
       return !isNaN(fechaObj.getTime()) ? fechaObj.toLocaleDateString("es-MX") : "N/A"
@@ -289,12 +297,30 @@ const ExcelExportModal = ({ isOpen, onClose, proyectos, onExport }) => {
             <h4>Filtro de Fechas</h4>
             <div className="filter-options">
               {[
-                { key: "all", label: "Todos" },
-                { key: "thisMonth", label: "Este Mes" },
-                { key: "lastMonth", label: "Mes Anterior" },
-                { key: "thisYear", label: "Este Año" },
-                { key: "lastYear", label: "Año Anterior" },
-                { key: "custom", label: "Personalizado" },
+                {
+                  key: "all",
+                  label: "Todos",
+                },
+                {
+                  key: "thisMonth",
+                  label: "Este Mes",
+                },
+                {
+                  key: "lastMonth",
+                  label: "Mes Anterior",
+                },
+                {
+                  key: "thisYear",
+                  label: "Este Año",
+                },
+                {
+                  key: "lastYear",
+                  label: "Año Anterior",
+                },
+                {
+                  key: "custom",
+                  label: "Personalizado",
+                },
               ].map(({ key, label }) => (
                 <button
                   key={key}
