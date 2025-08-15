@@ -5,6 +5,7 @@ import { authService } from "../services/authService"
 import { showNotification } from "./NotificationSystem"
 import "../CSS/Dashboard.css"
 import { Users, Folder, LayoutDashboard, CheckCircle, Clock, DollarSign, Lock, LogOut, Calendar } from "lucide-react"
+import logo from '../assets/Logo_ESIES.png';
 
 const Dashboard = ({ onNavigate, onLogout }) => {
   const [stats, setStats] = useState({
@@ -282,7 +283,7 @@ const Dashboard = ({ onNavigate, onLogout }) => {
       <main className="contenido">
         {/* Header */}
         <div className="logo-container">
-            <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo"/>
+            <img src={logo} alt="Logo ESIES" className="sidebar-logo"/>
         <div className="content-header">
           <div className="user-info">
             <span>{authService.getCurrentUser()?.nombre || "Administrador"}</span>

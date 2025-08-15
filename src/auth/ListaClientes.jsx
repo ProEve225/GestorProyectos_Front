@@ -12,6 +12,7 @@ import {
   Search,
   Eye
 } from 'lucide-react';
+import logo from '../assets/Logo_ESIES.png';
 
 const ListaClientes = ({ onNavigate, onLogout }) => {
   const [clientes, setClientes] = useState([]);
@@ -391,7 +392,7 @@ const ListaClientes = ({ onNavigate, onLogout }) => {
 
       <main className="contenido">
         <div className="logo-container">
-            <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo"/>
+            <img src={logo} alt="Logo ESIES" className="sidebar-logo"/>
         <div className="content-header">
           <div className="user-info">
             <span>{authService.getCurrentUser()?.nombre || "Administrador"}</span>

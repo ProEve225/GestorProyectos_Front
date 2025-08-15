@@ -7,6 +7,7 @@ import "../CSS/ListaProyectos.css"
 import { Users, Folder, LayoutDashboard, Lock, LogOut, Search, Calendar } from "lucide-react"
 import ExcelExportModal from '../components/ExcelExportModal.jsx';
 import '../components/ExcelExportModal.css';
+import logo from '../assets/Logo_ESIES.png';
 
 const ListaProyectos = ({ onNavigate, onLogout }) => {
   const [proyectos, setProyectos] = useState([])
@@ -353,7 +354,7 @@ const ListaProyectos = ({ onNavigate, onLogout }) => {
 
       <main className="contenido">
         <div className="logo-container">
-            <img src="src\assets\Logo_ESIES.png" alt="Logo ESIES" className="sidebar-logo"/>
+            <img src={logo} alt="Logo ESIES" className="sidebar-logo"/>
         <div className="content-header">
           <div className="user-info">
             <span>{authService.getCurrentUser()?.nombre || "Administrador"}</span>
